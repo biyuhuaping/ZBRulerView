@@ -10,7 +10,7 @@
 
 @interface ZBRulerView : UIView
 
-@property (nonatomic, assign) double minAmount;
-@property (nonatomic, assign) double maxAmount;
+@property (nonatomic, assign) double minAmount; //最小值
+@property (nonatomic, assign) double maxAmount; //最大值
 
 @end

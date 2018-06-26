@@ -21,6 +21,7 @@
     
     ZBRulerView *rulerView = [[ZBRulerView alloc] initWithFrame:CGRectMake(0, 200, CGRectGetWidth(self.view.frame), 100)];
     rulerView.minAmount = 100;
+    rulerView.maxAmount = 2000;
     [self.view addSubview:rulerView];
 }
 
