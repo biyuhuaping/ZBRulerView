@@ -20,8 +20,9 @@
     self.view.backgroundColor = [UIColor lightTextColor];
     
     ZBRulerView *rulerView = [[ZBRulerView alloc] initWithFrame:CGRectMake(0, 200, CGRectGetWidth(self.view.frame), 100)];
-    rulerView.minAmount = 100;
-    rulerView.maxAmount = 2000;
+    rulerView.minValue = 100;
+    rulerView.maxValue = 2000;
+    rulerView.defaultValue = 500;
     [self.view addSubview:rulerView];
 }
 

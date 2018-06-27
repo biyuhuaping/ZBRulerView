@@ -35,7 +35,7 @@
         [self addSubview:self.textField];
         [self addSubview:self.markLine];
         [self addSubview:self.bottomLine];
-        _minAmount = 0;     //设置默认初始值
+        _minValue = 0;     //设置默认初始值
         //        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textDidChanged:) name:UITextFieldTextDidChangeNotification object:nil];
     }
     return self;
@@ -50,44 +50,56 @@
         [self addSubview:self.textField];
         [self addSubview:self.markLine];
         [self addSubview:self.bottomLine];
-        _minAmount = 0;//设置默认初始值
+        _minValue = 0;//设置默认初始值
     }
     return self;
 }
 
-- (void)setMinAmount:(double)minAmount{
+- (void)setMinValue:(double)minValue{
+    _minValue = minValue;
     self.scrollView.contentOffset = CGPointMake(0, 0);
-    self.textField.text = [NSString stringWithFormat:@"%.f", minAmount];
-    _minAmount = minAmount;
+    self.textField.text = [NSString stringWithFormat:@"%.f", _minValue];
 }
 
-- (void)setMaxAmount:(double)maxAmount{
-    _maxAmount = maxAmount;
+- (void)setMaxValue:(double)maxValue{
+    _maxValue = maxValue;
     [self createIndicator];
 }
 
+- (void)setDefaultValue:(double)defaultValue{
+    if (defaultValue > _maxValue) {
+        _defaultValue = _maxValue;
+    } else if (defaultValue < _minValue) {
+        _defaultValue = _minValue;
+    } else {
+        _defaultValue = defaultValue;
+    }
+    self.scrollView.contentOffset = CGPointMake((_defaultValue-_minValue)/kMinScale*kPadding, 0);
+    self.textField.text = [NSString stringWithFormat:@"%.f", _defaultValue];
+}
+
 - (void)createIndicator{
-    for (NSUInteger i = self.minAmount, j = 0; i <= self.maxAmount; i+=kMinScale, j++) {
+    for (NSUInteger i = self.minValue, j = 0; i <= self.maxValue; i+=kMinScale, j++) {
         _scrollWidth += kPadding;
-        [self drawSegmentWithAmount:i idx:j];
+        [self drawSegmentWithValue:i idx:j];
     }
     self.scrollView.contentSize = CGSizeMake(_scrollWidth-kPadding, CGRectGetHeight(self.frame));
 }
 
-- (void)drawSegmentWithAmount:(NSUInteger)amount idx:(NSUInteger)idx {
+- (void)drawSegmentWithValue:(NSUInteger)value idx:(NSUInteger)idx {
     UIBezierPath *path = [UIBezierPath bezierPath];
     CGFloat x = kScreenWidth*0.5 + kPadding*idx;
     [path moveToPoint:CGPointMake(x, CGRectGetHeight(self.frame)-5)];
     
-    if (amount % (kMinScale*10) == 0 || amount == _minAmount) { //每10个刻度，do something
+    if (value % (kMinScale*10) == 0 || value == _minValue) { //每10个刻度，do something
         [path addLineToPoint:CGPointMake(x, CGRectGetHeight(self.frame)-10-5-10)];
         UILabel *numLabel = [[UILabel alloc] initWithFrame:CGRectMake(x-50*0.5, CGRectGetHeight(self.frame)-20-10-5-5, 50, 10)];
         numLabel.font = [UIFont systemFontOfSize:12];
         numLabel.textAlignment = NSTextAlignmentCenter;
         numLabel.textColor = [UIColor redColor];
-        numLabel.text = [NSString stringWithFormat:@"%ld", amount];
+        numLabel.text = [NSString stringWithFormat:@"%ld", value];
         [self.scrollView addSubview:numLabel];
-    } else if (amount % (kMinScale*2) != 0) {   //每2个刻度，do something
+    } else if (value % (kMinScale*2) != 0) {   //每2个刻度，do something
         [path addLineToPoint:CGPointMake(x, CGRectGetHeight(self.frame)-10)];
     } else{
         [path addLineToPoint:CGPointMake(x, CGRectGetHeight(self.frame)-10-5)];
@@ -106,32 +118,32 @@
 #pragma mark - UIScrollViewDelegate
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     CGFloat num = scrollView.contentOffset.x;
-    double amount = (num / kPadding) * kMinScale + self.minAmount;
-    if (amount < self.minAmount) {
-        amount = self.minAmount;
-    }else if (amount > self.maxAmount) {
-        amount = self.maxAmount;
+    double value = (num / kPadding) * kMinScale + self.minValue;
+    if (value < self.minValue) {
+        value = self.minValue;
+    }else if (value > self.maxValue) {
+        value = self.maxValue;
     }
     
-    self.textField.text = [NSString stringWithFormat:@"%.f", amount];
+    self.textField.text = [NSString stringWithFormat:@"%.f", value];
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView{
     CGFloat num = scrollView.contentOffset.x;
-    NSInteger amount = (num / kPadding) * kMinScale + self.minAmount;
-    amount =  amount - amount % kMinScale;
-    [self.scrollView setContentOffset:CGPointMake((amount-_minAmount)/kMinScale*kPadding, 0) animated:YES];
-    self.textField.text = [NSString stringWithFormat:@"%ld", amount];
+    NSInteger value = (num / kPadding) * kMinScale + self.minValue;
+    value =  value - value % kMinScale;
+    [self.scrollView setContentOffset:CGPointMake((value-_minValue)/kMinScale*kPadding, 0) animated:YES];
+    self.textField.text = [NSString stringWithFormat:@"%ld", value];
 }
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate{
     if(!decelerate){
         //OK,真正停止了，do something
         CGFloat num = scrollView.contentOffset.x;
-        NSInteger amount = (num / kPadding) * kMinScale + self.minAmount;
-        amount =  amount - amount % kMinScale;
-        [self.scrollView setContentOffset:CGPointMake((amount-_minAmount)/kMinScale*kPadding, 0) animated:YES];
-        self.textField.text = [NSString stringWithFormat:@"%ld", amount];
+        NSInteger value = (num / kPadding) * kMinScale + self.minValue;
+        value =  value - value % kMinScale;
+        [self.scrollView setContentOffset:CGPointMake((value-_minValue)/kMinScale*kPadding, 0) animated:YES];
+        self.textField.text = [NSString stringWithFormat:@"%ld", value];
     }
 }
 
@@ -142,11 +154,11 @@
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField {
-    if (textField.text.doubleValue > self.maxAmount) {
-        textField.text = [NSString stringWithFormat:@"%.f",self.maxAmount];
+    if (textField.text.doubleValue > self.maxValue) {
+        textField.text = [NSString stringWithFormat:@"%.f",self.maxValue];
     }
     
-    [self.scrollView setContentOffset:CGPointMake((textField.text.doubleValue-_minAmount)/kMinScale*kPadding, 0) animated:YES];
+    [self.scrollView setContentOffset:CGPointMake((textField.text.doubleValue-_minValue)/kMinScale*kPadding, 0) animated:YES];
     self.textField.text = textField.text;
 }
 
@@ -155,7 +167,7 @@
     UITextField *textField = info.object;
     NSString *text = textField.text;
     if (textField.isEditing) {
-        self.scrollView.contentOffset = CGPointMake((text.doubleValue-_minAmount)/kMinScale*kPadding, 0);
+        self.scrollView.contentOffset = CGPointMake((text.doubleValue-_minValue)/kMinScale*kPadding, 0);
         self.textField.text = text;
     }
 }
