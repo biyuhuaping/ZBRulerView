@@ -112,9 +112,30 @@
     }else if (amount > self.maxAmount) {
         amount = self.maxAmount;
     }
+    
     self.textField.text = [NSString stringWithFormat:@"%.f", amount];
 }
 
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView{
+    CGFloat num = scrollView.contentOffset.x;
+    NSInteger amount = (num / kPadding) * kMinScale + self.minAmount;
+    amount =  amount - amount % kMinScale;
+    [self.scrollView setContentOffset:CGPointMake((amount-_minAmount)/kMinScale*kPadding, 0) animated:YES];
+    self.textField.text = [NSString stringWithFormat:@"%ld", amount];
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate{
+    if(!decelerate){
+        //OK,真正停止了，do something
+        CGFloat num = scrollView.contentOffset.x;
+        NSInteger amount = (num / kPadding) * kMinScale + self.minAmount;
+        amount =  amount - amount % kMinScale;
+        [self.scrollView setContentOffset:CGPointMake((amount-_minAmount)/kMinScale*kPadding, 0) animated:YES];
+        self.textField.text = [NSString stringWithFormat:@"%ld", amount];
+    }
+}
+
+#pragma mark - textField
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
     [self endEditing:YES];
     return YES;
@@ -125,7 +146,7 @@
         textField.text = [NSString stringWithFormat:@"%.f",self.maxAmount];
     }
     
-    [self.scrollView setContentOffset:CGPointMake(textField.text.doubleValue/kMinScale*kPadding, 0) animated:YES];
+    [self.scrollView setContentOffset:CGPointMake((textField.text.doubleValue-_minAmount)/kMinScale*kPadding, 0) animated:YES];
     self.textField.text = textField.text;
 }
 
