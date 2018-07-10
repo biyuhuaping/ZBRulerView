@@ -147,7 +147,7 @@
     }
 }
 
-#pragma mark - textField
+#pragma mark - UITextFieldDelegate
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
     [self endEditing:YES];
     return YES;

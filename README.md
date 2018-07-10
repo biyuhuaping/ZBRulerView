@@ -2,7 +2,7 @@
 金融类选择金额的游标尺
 
 <p align="center">
-<img src="https://img-blog.csdn.net/20180626172222930?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2JpeXVodWFwaW5n/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70">
+<img src="https://upload-images.jianshu.io/upload_images/5132421-d8439eede1d017e3.gif?imageMogr2/auto-orient/strip%7CimageView2/2/w/398">
 </p>
 
 
