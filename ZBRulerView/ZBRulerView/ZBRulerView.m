@@ -11,7 +11,7 @@
 #define kScreenWidth     [[UIScreen mainScreen] bounds].size.width
 #define kScreenHeight    [[UIScreen mainScreen] bounds].size.height
 
-#define kPadding 5      //  最小刻度之间的宽度，像素
+#define kPadding 10     //  最小刻度之间的宽度，像素
 #define kMinScale 10    //  最小刻度值
 
 @interface ZBRulerView ()<UIScrollViewDelegate, UITextFieldDelegate>
@@ -89,20 +89,20 @@
 - (void)drawSegmentWithValue:(NSUInteger)value idx:(NSUInteger)idx {
     UIBezierPath *path = [UIBezierPath bezierPath];
     CGFloat x = kScreenWidth*0.5 + kPadding*idx;
-    [path moveToPoint:CGPointMake(x, CGRectGetHeight(self.frame)-5)];
-    
+    [path moveToPoint:CGPointMake(x, CGRectGetMinY(self.bottomLine.frame))];
+
     if (value % (kMinScale*10) == 0 || value == _minValue) { //每10个刻度，do something
-        [path addLineToPoint:CGPointMake(x, CGRectGetHeight(self.frame)-10-5-10)];
-        UILabel *numLabel = [[UILabel alloc] initWithFrame:CGRectMake(x-50*0.5, CGRectGetHeight(self.frame)-20-10-5-5, 50, 10)];
+        [path addLineToPoint:CGPointMake(x, CGRectGetMinY(self.bottomLine.frame)-10-10)];
+        UILabel *numLabel = [[UILabel alloc] initWithFrame:CGRectMake(x-50*0.5, CGRectGetMinY(self.bottomLine.frame)-20-10-5, 50, 10)];
         numLabel.font = [UIFont systemFontOfSize:12];
         numLabel.textAlignment = NSTextAlignmentCenter;
         numLabel.textColor = [UIColor redColor];
         numLabel.text = [NSString stringWithFormat:@"%ld", value];
         [self.scrollView addSubview:numLabel];
     } else if (value % (kMinScale*2) != 0) {   //每2个刻度，do something
-        [path addLineToPoint:CGPointMake(x, CGRectGetHeight(self.frame)-10)];
+        [path addLineToPoint:CGPointMake(x, CGRectGetMinY(self.bottomLine.frame)-5)];
     } else{
-        [path addLineToPoint:CGPointMake(x, CGRectGetHeight(self.frame)-10-5)];
+        [path addLineToPoint:CGPointMake(x, CGRectGetMinY(self.bottomLine.frame)-10)];
     }
     
     CAShapeLayer *line = [[CAShapeLayer alloc] init];
@@ -154,6 +154,9 @@
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField {
+    if (textField.text.doubleValue < self.minValue) {
+        textField.text = [NSString stringWithFormat:@"%.f",self.minValue];
+    }
     if (textField.text.doubleValue > self.maxValue) {
         textField.text = [NSString stringWithFormat:@"%.f",self.maxValue];
     }
@@ -186,8 +189,13 @@
 
 - (UIView *)markLine {
     if (!_markLine) {
-        _markLine = [[UIView alloc] initWithFrame:CGRectMake((kScreenWidth-1)*0.5, CGRectGetMaxY(_textField.frame)+5, 1, CGRectGetHeight(self.frame)-CGRectGetMaxY(_textField.frame)-5-5)];
+        _markLine = [[UIView alloc] initWithFrame:CGRectMake((kScreenWidth-1)*0.5, CGRectGetMinY(self.bottomLine.frame)-50, 1, 50)];
         _markLine.backgroundColor = [UIColor orangeColor];
+        
+        UIView *circular = [[UIView alloc]initWithFrame:CGRectMake(-2.5, CGRectGetMaxY(_markLine.bounds)-3, 6, 6)];
+        circular.backgroundColor = [UIColor orangeColor];
+        circular.layer.cornerRadius = 3;
+        [_markLine addSubview:circular];
     }
     return _markLine;
 }
@@ -202,7 +210,7 @@
 
 - (UIScrollView *)scrollView {
     if (!_scrollView) {
-        _scrollView = [[UIScrollView alloc] initWithFrame:self.bounds];
+        _scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, kScreenWidth, CGRectGetHeight(self.frame))];
         _scrollView.showsHorizontalScrollIndicator = NO;
         _scrollView.delegate = self;
     }
