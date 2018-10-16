@@ -29,13 +29,7 @@
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-        _scrollWidth = kScreenWidth;
-        self.backgroundColor = [UIColor whiteColor];
-        [self addSubview:self.scrollView];
-        [self addSubview:self.textField];
-        [self addSubview:self.markLine];
-        [self addSubview:self.bottomLine];
-        _minValue = 0;     //设置默认初始值
+        [self initRulerViewData];
         //        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(textDidChanged:) name:UITextFieldTextDidChangeNotification object:nil];
     }
     return self;
@@ -44,15 +38,19 @@
 - (instancetype)initWithCoder:(NSCoder *)aDecoder{
     self = [super initWithCoder:aDecoder];
     if (self) {
-        _scrollWidth = kScreenWidth;
-        self.backgroundColor = [UIColor whiteColor];
-        [self addSubview:self.scrollView];
-        [self addSubview:self.textField];
-        [self addSubview:self.markLine];
-        [self addSubview:self.bottomLine];
-        _minValue = 0;//设置默认初始值
+        [self initRulerViewData];
     }
     return self;
+}
+
+- (void)initRulerViewData{
+    _scrollWidth = kScreenWidth;
+    self.backgroundColor = [UIColor whiteColor];
+    [self addSubview:self.scrollView];
+    [self addSubview:self.textField];
+    [self addSubview:self.bottomLine];
+    [self addSubview:self.markLine];
+    _minValue = 0;//设置默认初始值
 }
 
 - (void)setMinValue:(double)minValue{
@@ -129,22 +127,22 @@
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView{
-    CGFloat num = scrollView.contentOffset.x;
-    NSInteger value = (num / kPadding) * kMinScale + self.minValue;
-    value =  value - value % kMinScale;
-    [self.scrollView setContentOffset:CGPointMake((value-_minValue)/kMinScale*kPadding, 0) animated:YES];
-    self.textField.text = [NSString stringWithFormat:@"%ld", value];
+    [self updateDataWith:scrollView];
 }
 
 - (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate{
     if(!decelerate){
         //OK,真正停止了，do something
-        CGFloat num = scrollView.contentOffset.x;
-        NSInteger value = (num / kPadding) * kMinScale + self.minValue;
-        value =  value - value % kMinScale;
-        [self.scrollView setContentOffset:CGPointMake((value-_minValue)/kMinScale*kPadding, 0) animated:YES];
-        self.textField.text = [NSString stringWithFormat:@"%ld", value];
+        [self updateDataWith:scrollView];
     }
+}
+
+- (void)updateDataWith:(UIScrollView *)scrollView{
+    CGFloat num = scrollView.contentOffset.x;
+    NSInteger value = (num / kPadding) * kMinScale + self.minValue;
+    value =  value - value % kMinScale;
+    [self.scrollView setContentOffset:CGPointMake((value-_minValue)/kMinScale*kPadding, 0) animated:YES];
+    self.textField.text = [NSString stringWithFormat:@"%ld", value];
 }
 
 #pragma mark - UITextFieldDelegate
